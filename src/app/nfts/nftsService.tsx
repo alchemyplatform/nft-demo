@@ -12,12 +12,6 @@ import {
   WalletAddress,
 } from "@/app/types"
 
-export interface NftMetadata {
-  name: string;
-  gatewayUrl?: string;
-  thumbnailUrl?: string;
-}
-
 export interface NftTable {
   setNft(contractAddress: ContractAddress, tokenId: NftTokenId, nft: Nft): void;
   getNft(

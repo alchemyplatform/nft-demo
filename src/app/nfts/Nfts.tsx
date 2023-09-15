@@ -5,13 +5,16 @@ import Image from 'next/image'
 import { NftEntry } from "@/app/nfts/nftsController";
 import LoadSpinner from "@/app/components/LoadSpinner";
 import useControllers from "@/app/hooks/useControllers";
-import { Button, Label, TextInput } from "flowbite-react";
+import { Button, Label, Sidebar, TextInput } from "flowbite-react";
+import { OwnedNft } from "alchemy-sdk";
+import ReactJson from "react-json-view";
 
 export default function Nfts() {
   const [address, setAddress] = useState('0xF5FFF32CF83A1A614e15F25Ce55B0c0A6b5F8F2c')
   const [loading, setLoading] = useState(true)
   const [showSpam, setShowSpam] = useState(false);
   const [nfts, setNfts] = useState<NftEntry[]>([]);
+  const [rawResponse, setRawResponse] = useState<OwnedNft[]>([]);
 
   const {nftsController} = useControllers();
 
@@ -24,15 +27,14 @@ export default function Nfts() {
   }, []);
 
   async function fetchNfts() {
-    console.clear();
     if (address) {
       setLoading(true);
       setNfts([]);
 
       const refreshNfts = async () => {
-        const nfts = await nftsController.getNfts(address);
-        console.log(nfts);
+        const {rawResponse, nfts} = await nftsController.getNfts(address);
         setNfts(nfts);
+        setRawResponse(rawResponse);
       };
 
       refreshNfts()
@@ -50,20 +52,37 @@ export default function Nfts() {
     <div className="p-4 flex flex-col justify-center gap-4">
       <NftsAddressForm address={address} setAddress={setAddress} loading={loading} onSubmit={fetchNfts}/>
 
-      <div className="flex flex-col gap-4">
-        <NftsHeader
-          nfts={nfts}
-          showSpam={showSpam}
-          toggleSpam={() =>
-            setShowSpam((currentShowSpam) => {
-              return !currentShowSpam;
-            })
-          }
-        />
-        <NftsContainer loading={loading} nfts={nftsToShow}/>
+      <div className="flex flex-row gap-4 h-screen">
+        <div className="flex flex-col w-1/2 gap-4 h-full">
+          <NftsHeader
+            nfts={nfts}
+            showSpam={showSpam}
+            toggleSpam={() =>
+              setShowSpam((currentShowSpam) => {
+                return !currentShowSpam;
+              })
+            }
+          />
+          <NftsContainer loading={loading} nfts={nftsToShow}/>
+        </div>
+
+        <div className="flex w-1/2 h-full">
+          <DevSidebar rawResponse={rawResponse}/>
+        </div>
       </div>
     </div>
   )
+}
+
+interface DevSidebarProps {
+  rawResponse: OwnedNft[];
+}
+
+function DevSidebar({rawResponse}: DevSidebarProps) {
+  return (<Sidebar className="w-full">
+    <ReactJson src={rawResponse} collapsed={2} theme="monokai" name={false} enableClipboard={true}
+               displayDataTypes={true} collapseStringsAfterLength={20}/>
+  </Sidebar>)
 }
 
 interface NftsAddressFormProps {
@@ -95,7 +114,7 @@ function NftsAddressForm({address, setAddress, loading, onSubmit}: NftsAddressFo
           />
         </div>
 
-        <Button className="ml-4" type="submit" disabled={loading} onSubmit={(e) => {
+        <Button className="ml-4" type="submit" disabled={loading} onClick={(e) => {
           e.preventDefault()
           onSubmit();
         }}>
@@ -130,10 +149,9 @@ function NftsHeader({
           onClick={toggleSpam}
         >
           {showSpam ? (
-            <Image className="" src="/see.svg" width={24} height={24} alt={"Show spam"}/>
+            <Image src="/see.svg" width={24} height={24} alt={"Show spam"}/>
           ) : (
             <Image
-              className=""
               src="/ph_eye-bold.svg"
               width={24}
               height={24}
@@ -158,14 +176,14 @@ function NftsContainer({loading, nfts}: NftsContainerProps) {
       return <LoadSpinner/>;
     }
 
-    return (<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+    return (<div className="grid grid-cols-auto-fill-200px gap-4 overflow-y-auto h-full">
       {nfts.map((nft) => {
         return <NftItem nftItem={nft} key={nft.id}/>;
       })}
     </div>)
   }, [loading, nfts])
 
-  return (<div>
+  return (<div className="h-full">
     {content}
   </div>)
 }
@@ -181,11 +199,11 @@ function NftItem({nftItem}: NftItemProps) {
         <img className="w-[200px] h-[200px]" src={nftItem.imageUrl}/>
       </div>
       <div className="flex">
-        <span className="">
+        <span className="text-xs font-extralight text-gray-600 truncate hover:overflow-visible">
           {nftItem.collectionName}
         </span>
       </div>
-      <div className="">{nftItem.name}</div>
+      <div className="text-base font-bold truncate hover:overflow-visible">{nftItem.name}</div>
     </div>
   );
 }

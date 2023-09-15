@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import { BigNumber, OpenSeaCollectionMetadata } from "alchemy-sdk";
+import { BigNumber, OpenSeaCollectionMetadata, OwnedNft } from "alchemy-sdk";
 import { NftsService } from "@/app/nfts/nftsService";
 import { ContractAddress, Flavor, NftTokenId, WalletAddress, } from "@/app/types";
 
@@ -26,8 +26,13 @@ export interface NftStats {
   floorPrice?: number;
 }
 
+export interface NftsResponse {
+  rawResponse: OwnedNft[];
+  nfts: NftEntry[];
+}
+
 export interface NftsController {
-  getNfts(address: WalletAddress): Promise<NftEntry[]>;
+  getNfts(address: WalletAddress): Promise<NftsResponse>;
 
   getStats(id: NftId): Promise<NftStats>;
 }
@@ -36,7 +41,7 @@ export class NftsControllerImpl implements NftsController {
   constructor(private readonly nftsService: NftsService) {
   }
 
-  public async getNfts(address: WalletAddress): Promise<NftEntry[]> {
+  public async getNfts(address: WalletAddress): Promise<NftsResponse> {
     const nfts = await this.nftsService.getOwnerNfts(address);
 
     // NFT can be anything so we will only show a subset of all possibilities
@@ -46,7 +51,7 @@ export class NftsControllerImpl implements NftsController {
       return acceptedFormats.has(format) && !format.includes("svg+xml");
     }
 
-    return (
+    const processedNfts =
       nfts
         .filter((nft) => isAcceptedFormat(nft.media[0]?.format || "png"))
         .map((nft) => {
@@ -76,8 +81,12 @@ export class NftsControllerImpl implements NftsController {
             attributes,
             openSeaCollectionMetadata: nft.contract.openSea,
           };
-        })
-    );
+        });
+
+    return {
+      rawResponse: nfts,
+      nfts: processedNfts,
+    }
   }
 
   public async getStats(id: NftId): Promise<NftStats> {
