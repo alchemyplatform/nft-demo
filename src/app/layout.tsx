@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import { AlchemyProvider } from "@/app/hooks/useAlchemy";
 import { ServicesProvider } from "@/app/hooks/useServices";
 import { ControllersProvider } from "@/app/hooks/useControllers";
+import { Suspense } from "react";
 
 const inter = Inter({subsets: ['latin']})
 
@@ -17,7 +18,9 @@ export default function RootLayout({
     <AlchemyProvider>
       <ServicesProvider>
         <ControllersProvider>
-          {children}
+          <Suspense fallback={null}>
+            {children}
+          </Suspense>
         </ControllersProvider>
       </ServicesProvider>
     </AlchemyProvider>
