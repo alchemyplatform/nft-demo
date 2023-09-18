@@ -9,14 +9,20 @@
           "permissions": "read-all"
         }
       }
+    },
+    "vscode": {
+      "extensions": [
+        "ms-vscode.live-server"
+      ]
     }
   },
-  "updateContentCommand": "yarn",
-  "postCreateCommand":"  ",
   "postAttachCommand": {
     "server": "yarn dev"
   },
-  "forwardedPorts": [
-    3000
-  ]
+  "portsAttributes": {
+    "3000": {
+      "label": "Application",
+      "onAutoForward": "openPreview"
+    }
+  }
 }
