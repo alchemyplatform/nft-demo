@@ -10,5 +10,13 @@
         }
       }
     }
-  }
+  },
+  "updateContentCommand": "yarn",
+  "postCreateCommand":"  ",
+  "postAttachCommand": {
+    "server": "yarn dev"
+  },
+  "forwardedPorts": [
+    3000
+  ]
 }
