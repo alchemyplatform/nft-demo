@@ -31,6 +31,7 @@ export default function Nfts() {
     if (address) {
       setLoading(true);
       setNfts([]);
+      setRawResponse([]);
 
       const refreshNfts = async () => {
         const {rawResponse, nfts} = await nftsController.getNfts(address);
