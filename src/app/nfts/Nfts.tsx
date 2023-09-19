@@ -79,7 +79,7 @@ export default function Nfts() {
       <header className="mt-4">
         <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-2xl">
           <a className="flex items-center" href={"https://www.alchemy.com"}><Image src={resourceUrl("/alchemy.svg")} height={36} width={168} alt={"Alchemy Logo"}/></a>
-          <div className="hidden justify-between items-center w-full lg:flex lg:w-auto lg-order-1"><a href={"https://codespaces.new/alchemyplatform/nft-demo?quickstart=1"}><Image src={"https://github.com/codespaces/badge.svg"} height={32} width={249} alt={"Open in GitHub Codespaces"}/></a></div>
+          <div className="justify-between items-center w-full lg:flex lg:w-auto lg-order-1"><a href={"https://codespaces.new/alchemyplatform/nft-demo?quickstart=1"}><Image src={"https://github.com/codespaces/badge.svg"} height={32} width={249} alt={"Open in GitHub Codespaces"}/></a></div>
         </div>
       </header>
 
