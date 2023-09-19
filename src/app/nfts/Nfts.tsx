@@ -8,6 +8,7 @@ import useControllers from "@/app/hooks/useControllers";
 import { Button, Label, Sidebar, TextInput } from "flowbite-react";
 import { OwnedNft } from "alchemy-sdk";
 import ReactJson from "react-json-view";
+import { resourceUrl } from "@/app/utils/utils";
 
 export default function Nfts() {
   const [address, setAddress] = useState('0xF5FFF32CF83A1A614e15F25Ce55B0c0A6b5F8F2c')
@@ -48,29 +49,48 @@ export default function Nfts() {
     }
   }
 
+  const mainContent = useMemo(() => {
+    if (loading) {
+      return <LoadSpinner/>;
+    }
+
+    return <>
+      <div className="flex flex-col w-1/2 gap-4 h-full">
+        <NftsHeader
+          nfts={nfts}
+          showSpam={showSpam}
+          toggleSpam={() =>
+            setShowSpam((currentShowSpam) => {
+              return !currentShowSpam;
+            })
+          }
+        />
+        <NftsContainer nfts={nftsToShow}/>
+      </div>
+
+      <div className="flex w-1/2 h-full">
+        <DevSidebar rawResponse={rawResponse}/>
+      </div>
+    </>
+  }, [loading, nfts, rawResponse, showSpam])
+
   return (
-    <div className="p-4 flex flex-col justify-center gap-4">
-      <NftsAddressForm address={address} setAddress={setAddress} loading={loading} onSubmit={fetchNfts}/>
-
-      <div className="flex flex-row gap-4 h-screen">
-        <div className="flex flex-col w-1/2 gap-4 h-full">
-          <NftsHeader
-            nfts={nfts}
-            showSpam={showSpam}
-            toggleSpam={() =>
-              setShowSpam((currentShowSpam) => {
-                return !currentShowSpam;
-              })
-            }
-          />
-          <NftsContainer loading={loading} nfts={nftsToShow}/>
+    <>
+      <header className="mt-4">
+        <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-2xl">
+          <a className="flex items-center" href={"https://www.alchemy.com"}><Image src={resourceUrl("/alchemy.svg")} height={36} width={168} alt={"Alchemy Logo"}/></a>
+          <div className="hidden justify-between items-center w-full lg:flex lg:w-auto lg-order-1"><a href={"https://codespaces.new/alchemyplatform/nft-demo?quickstart=1"}><Image src={"https://github.com/codespaces/badge.svg"} height={32} width={249} alt={"Open in GitHub Codespaces"}/></a></div>
         </div>
+      </header>
 
-        <div className="flex w-1/2 h-full">
-          <DevSidebar rawResponse={rawResponse}/>
+      <div className="p-4 flex flex-col justify-center gap-4">
+        <NftsAddressForm address={address} setAddress={setAddress} loading={loading} onSubmit={fetchNfts}/>
+
+        <div className="flex flex-row gap-4 h-screen">
+          {mainContent}
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
@@ -149,10 +169,10 @@ function NftsHeader({
           onClick={toggleSpam}
         >
           {showSpam ? (
-            <Image src="/see.svg" width={24} height={24} alt={"Show spam"}/>
+            <Image src={resourceUrl("/see.svg")} width={24} height={24} alt={"Show spam"}/>
           ) : (
             <Image
-              src="/ph_eye-bold.svg"
+              src={resourceUrl("/ph_eye-bold.svg")}
               width={24}
               height={24}
               alt={"Hide spam"}
@@ -166,25 +186,16 @@ function NftsHeader({
 }
 
 interface NftsContainerProps {
-  loading: boolean;
   nfts: NftEntry[];
 }
 
-function NftsContainer({loading, nfts}: NftsContainerProps) {
-  const content = useMemo(() => {
-    if (loading) {
-      return <LoadSpinner/>;
-    }
-
-    return (<div className="grid grid-cols-auto-fill-200px gap-4 overflow-y-auto h-full">
+function NftsContainer({nfts}: NftsContainerProps) {
+  return (<div className="h-full">
+    <div className="grid grid-cols-auto-fill-200px gap-4 overflow-y-auto h-full">
       {nfts.map((nft) => {
         return <NftItem nftItem={nft} key={nft.id}/>;
       })}
-    </div>)
-  }, [loading, nfts])
-
-  return (<div className="h-full">
-    {content}
+    </div>
   </div>)
 }
 
